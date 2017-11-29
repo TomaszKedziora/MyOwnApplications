@@ -1,0 +1,234 @@
+package myownapplications.java.numbers;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+
+public class CreditCalculator extends JFrame implements ActionListener {
+
+    private JButton calculationButton, resetButton;
+    private JLabel amountOfCredit, annualInterestRate, commission, numberOfYears, typeOfInstallment;
+    private JTextField field1, field2, field3, field4;
+    private JLabel label1, label2, label3, label4, label5;
+    private String[] valuesToCombobox = {"", "raty równe", "raty malejące"};
+    private JComboBox dropDownList;
+    private String typeOfSelectedInstallment;
+
+    private double annualInterestRateInput;
+    private int numberOfYearsInput;
+    private int numberOfInstallments;
+    private double commissionInput;
+    private double amountOfCreditInput;
+    private double amountOfCreditGross;
+
+    public CreditCalculator() {
+// utworzenie ramki
+        setSize(600, 600);
+        setTitle("Kalkulator kredytowy");
+        setLayout(null);
+// utworzenie przycisku "Oblicz" oraz przypisanie odpowiedniej metody do wywołania po wciśnięciu
+        calculationButton = new JButton("Oblicz");
+        calculationButton.setBounds(180, 470, 80, 20);
+        add(calculationButton);
+        calculationButton.addActionListener(this);
+// utworzenie przycisku "Wyczyść" oraz przypisanie odpowiedniej metody do wywołania po wciśnięciu
+        resetButton = new JButton("Wyczyść");
+        resetButton.setBounds(310, 470, 85, 20);
+        add(resetButton);
+        resetButton.addActionListener(new ActionListener() {
+// metoda definiująca jakie czynności będą wykonane po użyciu przycisku "Wyczyść"
+            @Override
+            public void actionPerformed(ActionEvent b) {
+                field1.setText(null);
+                field2.setText(null);
+                field3.setText(null);
+                field4.setText(null);
+                dropDownList.setSelectedItem(valuesToCombobox[0]);
+                label1.setText(null);
+                label2.setText(null);
+                label3.setText(null);
+                label4.setText(null);
+                label5.setText(null);
+
+                repaint();
+                revalidate();
+            }
+        });
+// wstawienie etykiet do ramki głównej
+        amountOfCredit = new JLabel("Kwota kredytu (w PLN) : ");
+        amountOfCredit.setBounds(100, 80, 350, 20);
+        add(amountOfCredit);
+
+        annualInterestRate = new JLabel("Wysokość oprocentowania (w %) : ");
+        annualInterestRate.setBounds(100, 120, 350, 20);
+        add(annualInterestRate);
+
+        commission = new JLabel("Wysokość prowizji (w %) : ");
+        commission.setBounds(100, 160, 350, 20);
+        add(commission);
+
+        numberOfYears = new JLabel("Okres kredytowania (w latach) : ");
+        numberOfYears.setBounds(100, 200, 350, 20);
+        add(numberOfYears);
+
+        typeOfInstallment = new JLabel("Rodzaj rat : ");
+        typeOfInstallment.setBounds(100, 240, 350, 20);
+        add(typeOfInstallment);
+// wstawienie pól tekstowych do ramki głównej gdzie użytkownik będzie wprowadzał dane
+
+        field1 = new JTextField("");
+        field1.setBounds(380, 80, 110, 20);
+        add(field1);
+
+        field2 = new JTextField("");
+        field2.setBounds(380, 120, 110, 20);
+        add(field2);
+
+        field3 = new JTextField("");
+        field3.setBounds(380, 160, 110, 20);
+        add(field3);
+
+        field4 = new JTextField("");
+        field4.setBounds(380, 200, 110, 20);
+        add(field4);
+
+        dropDownList = new JComboBox(valuesToCombobox);
+        dropDownList.setBounds(380, 240, 110, 20);
+        add(dropDownList);
+    }
+
+    public static void main(String[] args) {
+        CreditCalculator mainWindow = new CreditCalculator();
+        mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainWindow.setVisible(true);
+    }
+// metoda definiująca jakie czynności będą wykonane po użyciu przycisku "Oblicz"
+    @Override
+    public void actionPerformed(ActionEvent a) {
+        typeOfSelectedInstallment = (String) dropDownList.getSelectedItem();
+
+        if (typeOfSelectedInstallment.equals(valuesToCombobox[1])) {
+
+            annualInterestRateInput = Double.parseDouble(field2.getText()) / 100;
+            commissionInput = Double.parseDouble(field3.getText()) / 100;
+            amountOfCreditInput = Double.parseDouble(field1.getText());
+            numberOfYearsInput = Integer.parseInt(field4.getText());
+            amountOfCreditGross = amountOfCreditInput + (amountOfCreditInput * commissionInput);
+            numberOfInstallments = numberOfYearsInput * 12;
+// wzór na wyliczenie raty równej
+            double equalInstallment = amountOfCreditGross * Math.pow(1 + annualInterestRateInput / 12,
+                    numberOfInstallments) * ((1 + annualInterestRateInput / 12 - 1) /
+                    (Math.pow(1 + annualInterestRateInput / 12, numberOfInstallments) - 1));
+// konwersja typu i zaokrąglenie do 2 miejsc po przecinku
+            BigDecimal resultOfEqualInstallment = new BigDecimal(equalInstallment);
+            resultOfEqualInstallment = resultOfEqualInstallment.setScale(2, RoundingMode.HALF_UP);
+
+            label1 = new JLabel("Rata równa wyniesie:    " + resultOfEqualInstallment + " PLN");
+            label1.setBounds(100, 290, 390, 20);
+            label1.setForeground(new Color(0, 0, 128));
+            add(label1);
+
+            double commissionAmount = amountOfCreditInput * commissionInput;
+            BigDecimal commissionResult = new BigDecimal(commissionAmount);
+            commissionResult = commissionResult.setScale(2, RoundingMode.HALF_UP);
+
+            label2 = new JLabel("Kwota prowizji:    " + commissionResult + " PLN");
+            label2.setBounds(100, 320, 410, 20);
+            label2.setForeground(new Color(0, 0, 128));
+            add(label2);
+
+            BigDecimal costOfCredit = resultOfEqualInstallment.multiply(new BigDecimal
+                    (numberOfInstallments)).subtract(new BigDecimal(amountOfCreditInput));
+
+            label3 = new JLabel("Całkowity koszt kredytu:    " + costOfCredit + " PLN");
+            label3.setBounds(100, 350, 430, 20);
+            label3.setForeground(new Color(0, 0, 128));
+            add(label3);
+
+            label4 = new JLabel("Całkowita kwota do spłaty:    " +
+                    costOfCredit.add(new BigDecimal(amountOfCreditInput)) + " PLN");
+            label4.setBounds(100, 380, 450, 20);
+            label4.setForeground(new Color(0, 0, 128));
+            add(label4);
+
+            label5 = new JLabel();
+        } else if (typeOfSelectedInstallment.equals(valuesToCombobox[2])) {
+
+            annualInterestRateInput = Double.parseDouble(field2.getText()) / 100;
+            commissionInput = Double.parseDouble(field3.getText()) / 100;
+            amountOfCreditInput = Double.parseDouble(field1.getText());
+            numberOfYearsInput = Integer.parseInt(field4.getText());
+            amountOfCreditGross = amountOfCreditInput + (amountOfCreditInput * commissionInput);
+            numberOfInstallments = numberOfYearsInput * 12;
+// instrukcja obliczająca pierwszą ratę malejącą :
+            double firstDecreasingInstallment = (amountOfCreditGross / numberOfInstallments) * (1 +
+                    (numberOfInstallments - 1 + 1) * (annualInterestRateInput / 12));
+
+            BigDecimal resultOfFirstDecreasingInstallment = new BigDecimal(firstDecreasingInstallment);
+            resultOfFirstDecreasingInstallment = resultOfFirstDecreasingInstallment.setScale(2,
+                    RoundingMode.HALF_UP);
+
+            label1 = new JLabel("Pierwsza rata malejąca wyniesie:    " +
+                    resultOfFirstDecreasingInstallment + " PLN");
+            label1.setBounds(100, 290, 390, 20);
+            label1.setForeground(new Color(0, 0, 128));
+            add(label1);
+// instrukcja obliczająca ostatnią ratę malejącą :
+            double lastDecreasingInstallment = (amountOfCreditGross / numberOfInstallments) * (1 +
+                    (numberOfInstallments - numberOfInstallments + 1) * (annualInterestRateInput / 12));
+
+            BigDecimal resultOfLastDecreasingInstallment = new BigDecimal(lastDecreasingInstallment);
+            resultOfLastDecreasingInstallment = resultOfLastDecreasingInstallment.setScale(2,
+                    RoundingMode.HALF_UP);
+
+            label2 = new JLabel("Ostatnia rata malejąca wyniesie:    "+resultOfLastDecreasingInstallment + " PLN");
+            label2.setBounds(100, 320, 390, 20);
+            label2.setForeground(new Color(0, 0, 128));
+            add(label2);
+
+            double commissionAmount2 = amountOfCreditInput * commissionInput;
+            BigDecimal commissionResult2 = new BigDecimal(commissionAmount2);
+            commissionResult2 = commissionResult2.setScale(2, RoundingMode.HALF_UP);
+
+            label3 = new JLabel("Kwota prowizji:    " + commissionResult2 + " PLN");
+            label3.setBounds(100, 350, 390, 20);
+            label3.setForeground(new Color(0, 0, 128));
+            add(label3);
+
+            double decreasingInstallment;
+
+            ArrayList listOfInstallment = new ArrayList();
+// wyliczenie i zapisanie wszystkich rat malejących do obiektu "listOfInstallment"
+            for (int i = 1; i <= numberOfInstallments; i++) {
+                decreasingInstallment = (amountOfCreditGross / numberOfInstallments) * (1 +
+                        (numberOfInstallments - i + 1) * (annualInterestRateInput / 12));
+                listOfInstallment.add(decreasingInstallment);
+            }
+
+            double sumOfInstallment = 0;
+// wyliczenie sumy wszystkich rat malejących
+            for (int i = 0; i < listOfInstallment.size(); i++) {
+                sumOfInstallment += (double) listOfInstallment.get(i);
+            }
+            BigDecimal resultOfInstallment = new BigDecimal(sumOfInstallment);
+            resultOfInstallment = resultOfInstallment.setScale(2, RoundingMode.HALF_UP);
+
+            label4 = new JLabel("Całkowita kwota do spłaty:    " + resultOfInstallment + " PLN");
+            label4.setBounds(100, 380, 390, 20);
+            label4.setForeground(new Color(0, 0, 128));
+            add(label4);
+
+            label5 = new JLabel("Całkowity koszt kredytu:    " +
+                    resultOfInstallment.subtract(new BigDecimal(amountOfCreditInput)) + " PLN");
+            label5.setBounds(100, 410, 390, 20);
+            label5.setForeground(new Color(0, 0, 128));
+            add(label5);
+        }
+        repaint();
+        revalidate();
+    }
+}
