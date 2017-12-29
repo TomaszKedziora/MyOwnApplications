@@ -232,3 +232,4 @@ public class CreditCalculator extends JFrame implements ActionListener {
         revalidate();
     }
 }
+
