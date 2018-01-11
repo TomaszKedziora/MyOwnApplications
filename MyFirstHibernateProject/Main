@@ -1,0 +1,32 @@
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import java.math.BigDecimal;
+
+public class Main {
+
+    public static void main(String[] args) {
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("tomek");
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        Employee employee = new Employee();
+        employee.setFirstName("Jan");
+        employee.setLastName("Kowalski");
+        employee.setSalary(15000);
+        employee.setSalary2(new BigDecimal("12345.55"));
+
+        Employee employee1 = new Employee();
+        employee1.setFirstName("Marek");
+        employee1.setLastName("Nowak");
+        employee1.setSalary(18000.50);
+        employee1.setSalary2(new BigDecimal("23456.12"));
+
+        entityManager.getTransaction().begin();
+        entityManager.persist(employee);
+        entityManager.persist(employee1);
+        entityManager.getTransaction().commit();
+
+        entityManager.close();
+        entityManagerFactory.close();
+    }
+}
