@@ -1,0 +1,9 @@
+public class Main {
+    public static void main(String[] args) {
+        Logger logger = new LoggerImpl();
+        UsersRep usersRep = new UsersRepImpl();
+
+        usersRep.setLogger(logger);
+        User user = usersRep.createUser("Tomek");
+    }
+}
